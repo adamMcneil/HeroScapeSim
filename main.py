@@ -107,7 +107,68 @@ class Ironwill(Character):
             Character.dealDamage(self, 1)
 
 
+class Hawthorne(Character):
+    def __init__(self, name, totalLife, attack, defence):
+        Character.__init__(self, name, totalLife, attack, defence)
 
+    def takeTurn(self, otherPlayer):
+        attackedRolled = Character.Attack(self)
+        damage = attackedRolled - otherPlayer.Defend()
+        otherPlayer.dealDamage(damage)
+        if attackedRolled > 1:
+            Hawthorne.takeTurn(self, otherPlayer)
+
+
+class Krug(Character):
+    def __init__(self, name, totalLife, attack, defence):
+        Character.__init__(self, name, totalLife, attack, defence)
+
+    def takeTurn(self, otherPlayer):
+        self.attack = 2 + self.totalLife - self.life
+        Character.takeTurn(self, otherPlayer)
+        Character.takeTurn(self, otherPlayer)
+
+
+class MacDirk(Character):
+    def __init__(self, name, totalLife, attack, defence):
+        Character.__init__(self, name, totalLife, attack, defence)
+
+    def takeTurn(self, otherPlayer):
+        Character.takeTurn(self, otherPlayer)
+        if self.life > 1:
+            Character.takeTurn(self, otherPlayer)
+            Character.dealDamage(self, 1)
+
+
+class Squad(Character):
+    def __init__(self, name, totalLife, attack, defence):
+        Character.__init__(self, name, totalLife, attack, defence)
+
+    def takeTurn(self, otherPlayer):
+        for i in range(0, self.life):
+            Character.takeTurn(self, otherPlayer)
+
+    def dealDamage(self, damage):
+        if damage > 0:
+            self.life -= 1
+
+
+class Imperium(Squad):
+    def __init__(self, name, totalLife, attack, defence):
+        Character.__init__(self, name, totalLife, attack, defence)
+
+    def takeTurn(self, otherPlayer):
+        for i in range(0, self.life):
+            Character.takeTurn(self, otherPlayer)
+            Character.takeTurn(self, otherPlayer)
+
+
+class OmnicronSnipers(Squad):
+    def __init__(self, name, totalLife, attack, defence):
+        Character.__init__(self, name, totalLife, attack, defence)
+
+    def Attack(self):
+        return Character.Attack(self) * 2
 
 
 def Battle(character1, character2):
@@ -177,5 +238,12 @@ morgrimm = Heirloom("Morgrimm", 6, 4, 2)
 venecWarlord = Character("Vence Warlord", 6, 4, 3)
 ironwill = Ironwill("Migol Ironwill", 5, 2, 4)
 carr = Character("Agent Carr", 4, 6, 4)
+hawthorne = Hawthorne("Sir Hawthore", 6, 3, 4)
+krug = Krug("Krug", 8, 2, 3)
+macdirk = MacDirk("Alastair Macdirk", 6, 5, 3)
 
-aLotOfBattles(carr, syvarris, 10000)
+squad = Squad("new Squad", 3, 4, 5)
+imperium = Imperium("Samira Kyrie", 3, 3, 3)
+omnicron = OmnicronSnipers("Omnicron Snipers", 3, 1, 3)
+
+aLotOfBattles(macdirk, krug, 10000)
