@@ -171,8 +171,8 @@ class Jotun(Character):
 
 class Kaemon(Character):
 
-    def __init__(self, name, totalLife, attack, defence, hasCounterStrike=False):
-        Character.__init__(self, name, totalLife, attack, defence, hasCounterStrike)
+    def __init__(self, name, totalLife, attack, defence, ):
+        Character.__init__(self, name, totalLife, attack, defence, True)
 
     def takeTurn(self, otherPlayer):
         Character.takeTurn(self, otherPlayer)
@@ -255,18 +255,16 @@ def Battle(character1, character2):
         return False, numberOfTurns
 
 
-def aLotOfBattles(character1, character2, totalBattles, doPrint=False):
+def aLotOfBattles(character1, character2, totalBattles):
     timeCharacter1Won = 0
     totalTurns = 0
     maxNumberOfTurns = -1
-    minNumberOfTurns = 100000
+    minNumberOfTurns = 10000000
     for i in range(0, totalBattles // 2):
-        if doPrint:
-            print("Battle", i + 1)
         # Battle 1
         character1.restoreHealth()
         character2.restoreHealth()
-        battleReturn = list(Battle(character1, character2))
+        battleReturn = Battle(character1, character2)
         numOfTurns = battleReturn[1]
         totalTurns += numOfTurns
         if numOfTurns < minNumberOfTurns:
@@ -278,7 +276,7 @@ def aLotOfBattles(character1, character2, totalBattles, doPrint=False):
         # Battle 2
         character1.restoreHealth()
         character2.restoreHealth()
-        battleReturn = list(Battle(character2, character1))
+        battleReturn = Battle(character2, character1)
         numOfTurns = battleReturn[1]
         totalTurns += numOfTurns
         if numOfTurns < minNumberOfTurns:
@@ -303,9 +301,9 @@ def test(character, numberOfTestes):
 
 
 ben = Character("ben", 1, 3, 2)
-adam = Character("adam", 10, 4, 1)
-testCharacter = Character("test", 4, 4, 3)
-squad = Squad("new Squad", 3, 100, 3)
+adam = Character("adam Character", 10, 4, 1)
+testCharacter = Character("test ", 4, 4, 3)
+testSquad = Squad("test Squad", 3, 100, 3)
 
 sonlen = Sonlen("Sonlen", 6, 4, 3)
 syvarris = Syvarris("Syvarris", 4, 3, 2)
@@ -322,7 +320,7 @@ jotun = Jotun("Jotun", 7, 8, 4)
 tor_kul_na = Character("Tor-Kul-Na", 6, 6, 5)
 thanos = Character("Thanos", 6, 6, 7)
 greenDragon = Character("Green Dragon", 9, 5, 5, True)
-kaemon = Kaemon("Kaemon Awa", 4, 4, 4, True)
+kaemon = Kaemon("Kaemon Awa", 4, 4, 4)
 
 imperium = Imperium("Samira Kyrie", 3, 3, 3)
 omnicron = OmnicronSnipers("Omnicron Snipers", 3, 1, 3)
@@ -331,5 +329,5 @@ lavaMosters = Squad("Lava Monsters", 3, 4, 4)
 blueSamurai = Squad("Kozuke Samurai", 3, 5, 3, True)
 orangeSamurai = Tagawa("Tagawa Samurai", 3, 3, 5)
 
-aLotOfBattles(blueSamurai, orangeSamurai, 10000)
+aLotOfBattles(sonlen, kaemon, 10000)
 # test(adam, 100000)
