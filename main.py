@@ -2,18 +2,22 @@ import random
 
 
 class Character:
+    name = "nothing"
     totalLife = 0
     life = 0
     attack = 0
     defence = 0
-    name = "nothing"
+    hasCounterStrike = False
+    type = "Character"
 
-    def __init__(self, name, totalLife, attack, defence):
+    def __init__(self, name, totalLife, attack, defence, hasCounterStrike = False):
         self.name = name
         self.totalLife = totalLife
         self.life = totalLife
         self.attack = attack
         self.defence = defence
+        self.hasCounterStrike = hasCounterStrike
+
 
     def Attack(self):
         totalAttack = 0
@@ -21,6 +25,7 @@ class Character:
             randNum = random.randint(0, 1)
             if randNum == 0:
                 totalAttack += 1
+        # print(self.name, "attacked with a", self.attack, "and rolled a", totalAttack)
         return totalAttack
 
     def Defend(self):
@@ -29,20 +34,32 @@ class Character:
             randNum = random.randint(0, 2)
             if randNum == 0:
                 totalDefence += 1
+        # print(self.name, "defended with a", self.defence, "and rolled a", totalDefence)
+
         return totalDefence
 
     def dealDamage(self, damage):
         if damage > 0:
             self.life -= damage
+            # print(self.name, "got hurt", damage)
             if self.life < 0:
                 self.life = 0
 
     def takeTurn(self, otherPlayer):
+        # print (self.name, self.life, "/", self.totalLife)
+        if otherPlayer.life == 0:
+            return
         damage = self.Attack() - otherPlayer.Defend()
         otherPlayer.dealDamage(damage)
+        self.counterStrike(otherPlayer, damage)
 
     def restoreHealth(self):
         self.life = self.totalLife
+
+    def counterStrike(self, otherPlayer, damage):
+        if otherPlayer.hasCounterStrike and damage < 0:
+            self.dealDamage(damage * -1)
+            # print(self.name, "got hurt from counter strike")
 
 
 class Sonlen(Character):
@@ -115,6 +132,7 @@ class Hawthorne(Character):
         attackedRolled = Character.Attack(self)
         damage = attackedRolled - otherPlayer.Defend()
         otherPlayer.dealDamage(damage)
+        self.counterStrike(otherPlayer, damage)
         if attackedRolled > 1:
             Hawthorne.takeTurn(self, otherPlayer)
 
@@ -140,17 +158,43 @@ class MacDirk(Character):
             Character.dealDamage(self, 1)
 
 
-class Squad(Character):
+class Jotun(Character):
     def __init__(self, name, totalLife, attack, defence):
         Character.__init__(self, name, totalLife, attack, defence)
 
     def takeTurn(self, otherPlayer):
+        if random.randint(1, 20) > 13:
+            if random.randint(1, 20) > 11:
+                otherPlayer.dealDamage(2)
+        Character.takeTurn(self, otherPlayer)
+
+
+class Kaemon(Character):
+
+    def __init__(self, name, totalLife, attack, defence, hasCounterStrike=False):
+        Character.__init__(self, name, totalLife, attack, defence, hasCounterStrike)
+
+    def takeTurn(self, otherPlayer):
+        Character.takeTurn(self, otherPlayer)
+        Character.takeTurn(self, otherPlayer)
+
+
+class Squad(Character):
+    type = "Squad"
+    def __init__(self, name, totalLife, attack, defence, hasCounterStrike=False):
+        Character.__init__(self, name, totalLife, attack, defence, hasCounterStrike)
+
+    def takeTurn(self, otherPlayer):
         for i in range(0, self.life):
+            if otherPlayer.life == 0:
+                return
             Character.takeTurn(self, otherPlayer)
 
     def dealDamage(self, damage):
         if damage > 0:
             self.life -= 1
+        if self.life < 0:
+            self.life = 0
 
 
 class Imperium(Squad):
@@ -169,6 +213,29 @@ class OmnicronSnipers(Squad):
 
     def Attack(self):
         return Character.Attack(self) * 2
+
+
+class Vipers(Squad):
+    def __init__(self, name, totalLife, attack, defence):
+        Character.__init__(self, name, totalLife, attack, defence)
+
+    def takeTurn(self, otherPlayer):
+        Squad.takeTurn(self, otherPlayer)
+        while random.randint(1, 20) > 15:
+            Squad.takeTurn(self, otherPlayer)
+
+
+class Tagawa(Squad):
+    def __init__(self, name, totalLife, attack, defence):
+        Character.__init__(self, name, totalLife, attack, defence, True)
+
+    def takeTurn(self, otherPlayer):
+        for i in range(0, self.life):
+            if otherPlayer.type == "Squad":
+                self.attack = 3 + otherPlayer.totalLife - otherPlayer.life
+            if otherPlayer.life == 0:
+                return
+            Character.takeTurn(self, otherPlayer)
 
 
 def Battle(character1, character2):
@@ -222,14 +289,23 @@ def aLotOfBattles(character1, character2, totalBattles, doPrint=False):
             timeCharacter1Won += 1
 
     print(character1.name, "win percentage:", timeCharacter1Won / totalBattles * 100)
-    print("turn is both people going")
+    print("turn is one person going")
     print("Average number of turns:", totalTurns / totalBattles)
     print("Most turns taken:", maxNumberOfTurns)
     print("Lest turns taken:", minNumberOfTurns)
 
 
+def test(character, numberOfTestes):
+    total = 0
+    for i in range(0, numberOfTestes):
+        total += character.Defend()
+    print(total / numberOfTestes)
+
+
 ben = Character("ben", 1, 3, 2)
 adam = Character("adam", 10, 4, 1)
+testCharacter = Character("test", 4, 4, 3)
+squad = Squad("new Squad", 3, 100, 3)
 
 sonlen = Sonlen("Sonlen", 6, 4, 3)
 syvarris = Syvarris("Syvarris", 4, 3, 2)
@@ -238,12 +314,22 @@ morgrimm = Heirloom("Morgrimm", 6, 4, 2)
 venecWarlord = Character("Vence Warlord", 6, 4, 3)
 ironwill = Ironwill("Migol Ironwill", 5, 2, 4)
 carr = Character("Agent Carr", 4, 6, 4)
-hawthorne = Hawthorne("Sir Hawthore", 6, 3, 4)
+hawthorne = Hawthorne("Sir Hawthore (blind rage)", 6, 3, 4)
+hawthorne2 = Character("Sir Hawthorne (not blind rage)", 6, 4, 4)
 krug = Krug("Krug", 8, 2, 3)
 macdirk = MacDirk("Alastair Macdirk", 6, 5, 3)
+jotun = Jotun("Jotun", 7, 8, 4)
+tor_kul_na = Character("Tor-Kul-Na", 6, 6, 5)
+thanos = Character("Thanos", 6, 6, 7)
+greenDragon = Character("Green Dragon", 9, 5, 5, True)
+kaemon = Kaemon("Kaemon Awa", 4, 4, 4, True)
 
-squad = Squad("new Squad", 3, 4, 5)
 imperium = Imperium("Samira Kyrie", 3, 3, 3)
 omnicron = OmnicronSnipers("Omnicron Snipers", 3, 1, 3)
+vipers = Vipers("Elite Onyx Vipers", 3, 3, 2)
+lavaMosters = Squad("Lava Monsters", 3, 4, 4)
+blueSamurai = Squad("Kozuke Samurai", 3, 5, 3, True)
+orangeSamurai = Tagawa("Tagawa Samurai", 3, 3, 5)
 
-aLotOfBattles(macdirk, krug, 10000)
+aLotOfBattles(blueSamurai, orangeSamurai, 10000)
+# test(adam, 100000)
